@@ -1,0 +1,9 @@
+<?php /*
+
+db.host => localhost
+db.database => dev.radio
+db.username => developer
+db.password => pass
+db.prefix =>
+
+*/
