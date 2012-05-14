@@ -53,26 +53,26 @@ $curShow = Core_Schedule::getCurrentShow(time() + 7*3600);
 $weekSchedule = Core_Schedule::loadSchedule(time() + 7*3600, time() + 7*3600 + 6*24*3600);
 
 // voting
-$lVoteUid = FGPC::getString('lastVote', FGPC::COOKIE, FStr::HEX);
+$lVoteUid = F()->appEnv->request->getString('lastVote', K3_Request::COOKIE, FStr::HEX);
 $lVote = TrackBase::getVote($lVoteUid);
 $voteBlocked = $lVote['track_id'] == $trackId;
 
-if (!is_null($rate = FGPC::getNum('vote'))) {
+if (!is_null($rate = F()->appEnv->request->getNumber('vote'))) {
     if (!$voteBlocked) {
         $nVoteUid = TrackBase::voteForTrack($trackId, $rate);
-        F()->HTTP->setCookie('lastVote', $nVoteUid);
+        F()->appEnv->client->setCookie('lastVote', $nVoteUid);
     }
-    if (F()->HTTP->isAjax) {
-        F()->HTTP->write('OK')->sendBuffer(false, 'text/plain');
+    if (F()->appEnv->request->isAjax) {
+        F()->appEnv->response->write('OK')->sendBuffer(false, 'text/plain');
     }
-    F()->HTTP->redirect(F()->HTTP->rootUrl.F_SITE_INDEX);
+    F()->appEnv->response->sendRedirect(F()->appEnv->server->rootUrl.F_SITE_INDEX);
 }
 
 $pageRelodTimer = ($mpc->curTrackPos <= $curTrack['time'])
     ? min($curTrack['time'] - $mpc->curTrackPos + 1, 30)
     : 30;
 
-    
+ob_start();
 //print_r($top10);
 ?>
 <html>
@@ -207,5 +207,5 @@ foreach($last10 as $item)
 </body>
 </html>
 <?php
- F()->HTTP->write(F()->HTTP->getOB())->sendBuffer();
+ F()->appEnv->response->write(ob_get_clean())->sendBuffer();
 ?>
