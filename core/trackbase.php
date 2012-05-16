@@ -2,6 +2,7 @@
 
 class TrackBase 
 {
+    /** @var FDataBase */
     protected static $db;
 
     public static function init(FDataBase $db = null)
