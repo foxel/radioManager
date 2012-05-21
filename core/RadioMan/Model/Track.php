@@ -1,7 +1,55 @@
 <?php
 
+/**
+ * @property string $uri
+ * @property string $title
+ * @property string $artist
+ * @property string $album
+ * @property string $genre
+ * @property bool $isStream
+ * @property int $albumTrack
+ * @property string $uriHash
+ * @property string $infoHash
+ */
 class RadioMan_Model_Track extends RadioMan_Model
 {
+    protected static $_dbMap = array(
+        'id'         => 'id',
+        'uri'        => 'uri',
+        'title'      => 'title',
+        'artist'     => 'artist',
+        'album'      => 'album',
+        'genre'      => 'genre',
+        'albumTrack' => 'a_track',
+        'isStream'   => 'is_stream',
+        'uriHash'    => 'uri_hash',
+        'infoHash'   => 'info_hash',
+    );
+    
+    public static function fromMPDInfo(array $mpdTrack) {
+        $mapped = array(
+            'uri'        => isset($mpdTrack['file'])   ? $mpdTrack['file']   : null,
+            'title'      => isset($mpdTrack['title'])  ? $mpdTrack['title']  : null,
+            'artist'     => isset($mpdTrack['artist']) ? $mpdTrack['artist'] : null,
+            'album'      => isset($mpdTrack['album'])  ? $mpdTrack['album']  : null,
+            'genre'      => isset($mpdTrack['genre'])  ? $mpdTrack['genre']  : null,
+            'albumTrack' => isset($mpdTrack['track'])  ? $mpdTrack['track']  : null,
+        );
+
+        $mapped['uriHash'] = md5($mapped['uri']);
+
+        if (preg_match('#^https?://#', $mpdTrack['file'])) {
+            $mapped['title']    = (isset($mpdTrack['name']) ? $mpdTrack['name'] : FStr::basename($mpdTrack['file'])).' (stream)';
+            $mapped['artist']   = $mapped['album'] = null;
+            $mapped['genre']    = 'stream';
+            $mapped['isStream'] = true;
+        }
+
+        $track = new self($mapped);
+        $track->updateInfoHash();
+        return $track;
+    }
+
     /**
      * @param array $data
      */
@@ -19,6 +67,8 @@ class RadioMan_Model_Track extends RadioMan_Model
             'uriHash'    => isset($data['uriHash']) ? (string)$data['uriHash'] : '',
             'infoHash'   => isset($data['infoHash']) ? (string)$data['infoHash'] : '',
         );
+
+        $this->updateInfoHash();
     }
 
     /**

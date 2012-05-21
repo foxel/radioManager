@@ -2,21 +2,21 @@
 define('STARTED', true);
 define('F_SITE_ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
 
-require_once('kernel3.php');
+require_once('/media/STORAGE/foxel/WEB-DEV/K3.5/kernel3/kernel3.php');
 require_once('/home/foxel/hosts/dev/sandbox.dev/www/radio/core/icecast.php');
 require_once('/home/foxel/hosts/dev/sandbox.dev/www/radio/core/trackbase.php');
 require_once('/home/foxel/hosts/dev/sandbox.dev/www/radio/core/schedule.php');
 
-$config = new FDataPool($c = (array)FMisc::loadDatafile(F_DATA_ROOT.DIRECTORY_SEPARATOR.'db.cfg.php', FMisc::DF_SLINE));
+$config = new K3_Config($c = (array)FMisc::loadDatafile(F_DATA_ROOT.DIRECTORY_SEPARATOR.'db.cfg.php', FMisc::DF_SLINE));
 // preparing DB
 F()->DBase->connect(
     array(
-        'dbname' => $config['db.database'],
-        'host'   => $config['db.host'],
+        'dbname' => $config->db->database,
+        'host'   => $config->db->host,
     ),
-    $config['db.username'],
-    $config['db.password'],
-    $config['db.prefix']
+    $config->db->username,
+    $config->db->password,
+    $config->db->prefix
 );
 
 FRegistry::setBackDB(F()->DBase);
