@@ -19,7 +19,7 @@ F()->DBase->connect(
     $config->db->prefix
 );
 
-FRegistry::setBackDB(F()->DBase);
+F()->Registry->setBackDB(F()->DBase);
 TrackBase::init(F()->DBase);
 Core_Schedule::init(F()->DBase);
 
@@ -122,9 +122,9 @@ ob_start();
   if (preg_match('#^https?://#', $curTrack['file']))
       print $curTrack['name'];
   else
-      print "{$curTrack['artist']} - {$curTrack['title']} ({$curTrack['album']})";
+      print ($curTrack['title'] ? "{$curTrack['artist']} - {$curTrack['title']} ({$curTrack['album']})" : FStr::basename($curTrack['file']));
   ?>
-  [ <span title="Статистика обновляется раз в минуту">композицию слушают: <? print (int) FRegistry::get('current.listeners'); ?></span> 
+  [ <span title="Статистика обновляется раз в минуту">композицию слушают: <? print (int) F()->Registry->get('current.listeners'); ?></span>
   | <a href="http://radio-server.imfurry.ru:8000/foxel.ogg.m3u">слушать</a> 
   <? if (!$voteBlocked) { ?>
   <span id="voteblock">| голосовать: 
@@ -135,9 +135,9 @@ ob_start();
    ]
  </p>
  <h2>Далее в эфире:</h2>
- <p><? print ($nextTrack && !preg_match('#^https?://#', $curTrack['file']))
-    ? F()->LNG->timeFormat(time() - $mpc->curTrackPos + $curTrack['time'], false, 6).": {$nextTrack['artist']} - {$nextTrack['title']} ({$nextTrack['album']})"
-    : 'Еще неизвестно :)'; ?></p>
+ <p><? print (($nextTrack && !preg_match('#^https?://#', $curTrack['file']))
+    ? F()->LNG->timeFormat(time() - $mpc->curTrackPos + $curTrack['time'], false, 6).': '.($nextTrack['title'] ? "{$nextTrack['artist']} - {$nextTrack['title']} ({$nextTrack['album']})" : FStr::basename($nextTrack['file']))
+    : 'Еще неизвестно :)'); ?></p>
  <h2>ТОП-10:</h2>
  <table style="width: 100%; font-size: 12px;">
   <tr>

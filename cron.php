@@ -22,18 +22,19 @@ F()->DBase->connect(
     $config['db.prefix']
 );
 
-FRegistry::setBackDB(F()->DBase);
+F()->Registry->setBackDB(F()->DBase);
 Core_MPDFill::init(F()->DBase);
 
 // getting stats
 
 $icenet = FMisc::loadDatafile('conf/icenet.cnf', FMisc::DF_SLINE);
+/** @var FMPC $mpc */
 $mpc = F()->MPC('localhost');
 $track = $mpc->playlist[$mpc->curTrack];
 $time = time() - $mpc->curTrackPos;
 $listeners = IcecastInfo::getListenersCount($icenet);
 $trackId = TrackBase::getTrackId($track);
-FRegistry::set('current.listeners', $listeners, true);
+F()->Registry->set('current.listeners', $listeners, true);
 TrackBase::setTrackPlay($trackId, $time, $listeners);
 
 // scheduled playback
@@ -59,7 +60,6 @@ if (!$mpc->nextTrack || !($nTrack = $mpc->playlist[$mpc->nextTrack+1]) || (!$mpc
     $mpc->add($track['uri']);
 }
 // the MPD is stopped
-if ($mpc->curTrack < 0) 
+if ($mpc->curTrack < 0 || $mpc->state != FMPC::STATE_PLAYING) {
     $mpc->play();
-
-?>
+}

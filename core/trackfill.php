@@ -2,7 +2,7 @@
 
 class Core_MPDFill 
 {
-    const NO_REPEAT_TIME = 18000;
+    const NO_REPEAT_TIME = 1800;
     public static $tz = 0;
 
     public static function init(FDataBase $db = null)
@@ -55,5 +55,3 @@ class Core_MPDFill
     }
 
 }
-
-?>

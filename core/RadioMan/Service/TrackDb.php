@@ -203,9 +203,13 @@ class RadioMan_Service_TrackDb
         return $select->fetchOne();
     }
 
+    /**
+     * @param int $id
+     * @return null|RadioMan_Model_TrackFilter
+     */
     public function getTrackFilter($id)
     {
-        $select = $this->db->select('trackfilter', 'f')
+        $select = $this->db->select('trackfilter', 'f', RadioMan_Model_TrackFilter::mapDbToModel('f'))
             ->join('trackfilter_item', array('filter_id' => 'f.id'), 'i', array('type', 'value'))
             ->where('f.id', $id);
         
@@ -223,12 +227,14 @@ class RadioMan_Service_TrackDb
             }
         }
 
-        return $filter;
+        return new RadioMan_Model_TrackFilter($filter);
     }
 
-    public function getTracksByFilter($filterId, $order = 'lastplay', $orderDesc = true)
+    public function getTracksByFilter($filter, $order = 'lastplay', $orderDesc = true)
     {
-        $filter = $this->getTrackFilter($filterId);
+        if (!($filter instanceof RadioMan_Model_TrackFilter)) {
+            $filter = $this->getTrackFilter($filter);
+        }
 
         if (!$filter)
             return array();
@@ -236,11 +242,12 @@ class RadioMan_Service_TrackDb
         $select = $this->db->select('track', 't')
             ->join('trackstat', array('track_id' => 'id'), 's', array('lastplay', 'rate'));
 
-        foreach ($filter['items'] as $key => $value) {
-            if ($key == 'path')
-                $select->where('t.uri', 'LIKE '.$value.'%')->addFlags(FDataBase::SQL_USEFUNCS);
-            else
+        foreach ($filter->items as $key => $value) {
+            if ($key == 'path') {
+                $select->where('t.uri LIKE ?', $value.'%');
+            } else {
                 $select->where('t.'.$key, $value);
+            }
         }
         $select->order($order, (bool) $orderDesc);
 
